@@ -357,8 +357,9 @@ def get_detail(place_id):
     #detail_json = get_populartimes(params["API_key"], place_id)
     detail_json = get_populartimes_by_detail(params["API_key"], g_places[place_id])
 
-    if params["all_places"] or "populartimes" in detail_json:
-        results.append(detail_json)
+    if detail_json is not None:
+        if params["all_places"] or "populartimes" in detail_json:
+            results.append(detail_json)
 
 
 def get_populartimes(api_key, place_id):
@@ -378,21 +379,24 @@ def get_populartimes(api_key, place_id):
 
 
 def get_populartimes_by_detail(api_key, detail):
-    address = detail["formatted_address"] if "formatted_address" in detail else detail["vicinity"]
+    try:
+        address = detail["formatted_address"] if "formatted_address" in detail else detail["vicinity"]
 
-    place_identifier = "{} {}".format(detail["name"], address)
+        place_identifier = "{} {}".format(detail["name"], address)
 
-    detail_json = {
-        "id": detail["place_id"],
-        "name": detail["name"],
-        "address": address,
-        "types": detail["types"],
-        "coordinates": detail["geometry"]["location"]
-    }
+        detail_json = {
+            "id": detail["place_id"],
+            "name": detail["name"],
+            "address": address,
+            "types": detail["types"],
+            "coordinates": detail["geometry"]["location"]
+        }
 
-    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
+        detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
 
-    return detail_json
+        return detail_json
+    except:
+        pass
 
 
 def check_response_code(resp):
